@@ -1,0 +1,86 @@
+---
+version: '3.1'
+
+services:
+
+  zookeeper:
+    image: zookeeper:latest
+    ports:
+      - 2181:2181
+     
+  kafka:
+    image: wurstmeister/kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092    
+    env_file:
+      - ./env/kafka.env
+
+  gateway:
+    image: kickscooter.azurecr.io/gateway
+    depends_on:
+      - kafka
+    ports:
+      - 80:8080
+    env_file:
+      - ./env/gateway.env
+
+  discovery:
+    image: kickscooter.azurecr.io/discovery
+    depends_on:
+      - kafka
+    ports:
+      - 8761:8761
+         
+  messaging:
+    image: kickscooter.azurecr.io/messaging
+    depends_on:
+      - kafka
+    ports:
+      - 8084:8080
+    env_file:
+      - ./env/messaging.env  
+      
+  identity:
+    image: kickscooter.azurecr.io/identity
+    ports:
+      - 8085:8080
+    env_file:
+      - ./env/identity.env
+      
+  payment:
+    image: kickscooter.azurecr.io/payment
+    ports:
+      - 8083:8080
+    env_file:
+      - ./env/payment.env
+      
+  trip:
+    image: kickscooter.azurecr.io/trip
+    depends_on:
+      - kafka
+    ports:
+      - 8086:8080
+    env_file:
+      - ./env/trip.env 
+
+  vehicle:
+    image: kickscooter.azurecr.io/vehicle
+    depends_on:
+      - kafka
+    ports:
+      - 8081:8080
+    env_file:
+      - ./env/vehicle.env
+
+  simulator:
+    image: kickscooter.azurecr.io/simulator
+    depends_on:
+      - kafka
+      - vehicle
+    ports:
+      - 8088:8080
+    env_file:
+      - ./env/simulator.env
+...
