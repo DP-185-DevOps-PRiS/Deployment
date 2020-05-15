@@ -42,12 +42,12 @@ restart_service() {
   if [ $(sudo netstat -ntulp | grep -c -w "2181") -ne 1 ]; then
     docker-compose up --no-deps -d zookeeper
   fi
-  
+
   # Check kafka.
   if [ $(sudo netstat -ntulp | grep -c -w "9092") -ne 1 ]; then
     docker-compose up --no-deps -d kafka
   fi
-  
+
   docker-compose up --no-deps -d $service
 }
 
