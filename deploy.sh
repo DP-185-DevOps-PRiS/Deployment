@@ -10,7 +10,7 @@ init_vars() {
 # Check if the service is active.
 check_service() {
   local services=(gateway discovery messaging identity payment trip vehicle simulator)
-  local ports=(80 8761 8084 8085 8083 8086 8081 8088)
+  local ports=(80 8761 8081 8082 8083 8084 8085 8086)
 
   # Find needed port.
   local i=0
