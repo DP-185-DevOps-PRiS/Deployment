@@ -7,12 +7,12 @@ services:
     image: google/cadvisor:latest
     container_name: cadvisor
     ports:
-    - 9200:8080
+      - 9200:8080
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
     restart: unless-stopped
 
   zookeeper:
