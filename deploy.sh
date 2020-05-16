@@ -48,6 +48,11 @@ restart_service() {
     docker-compose up --no-deps -d kafka
   fi
 
+  # Check cadvisor.
+  if [ $(sudo netstat -ntulp | grep -c -w "9200") -ne 1 ]; then
+    docker-compose up --no-deps -d cadvisor
+  fi
+
   docker-compose up --no-deps -d $service
 }
 
