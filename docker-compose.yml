@@ -31,8 +31,6 @@ services:
 
   gateway:
     image: kickscooter.azurecr.io/gateway
-    depends_on:
-      - kafka
     ports:
       - 80:8080
     env_file:
@@ -40,8 +38,6 @@ services:
 
   discovery:
     image: kickscooter.azurecr.io/discovery
-    depends_on:
-      - kafka
     ports:
       - 8761:8761
          
