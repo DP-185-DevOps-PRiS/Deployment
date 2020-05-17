@@ -2,7 +2,6 @@
 
 # Define needed variables.
 init_vars() {
-
   service=$1
   image_name=kickscooter.azurecr.io/$service
   container_name=kickscooter_${service}_1
@@ -10,7 +9,6 @@ init_vars() {
 
 # Check if the service is active.
 check_service() {
-
   local services=(gateway discovery messaging identity payment trip vehicle simulator)
   local ports=(80 8761 8081 8082 8083 8084 8085 8086)
   local i=0 # Index for lists
@@ -40,7 +38,6 @@ check_service() {
 }
 
 restart_service() {
-
   # Create the necessary dependencies if the network doesn't exist
   if [ $(sudo docker network ls | grep -c -w "kickscooter_default") -eq 0 ]; then
     dependencies_list=(zookeeper kafka cadvisor)
