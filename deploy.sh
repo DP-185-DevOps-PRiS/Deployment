@@ -2,6 +2,7 @@
 
 # Define needed variables.
 init_vars() {
+
   service=$1
   image_name=kickscooter.azurecr.io/$service
   container_name=kickscooter_${service}_1
@@ -9,11 +10,12 @@ init_vars() {
 
 # Check if the service is active.
 check_service() {
+
   local services=(gateway discovery messaging identity payment trip vehicle simulator)
   local ports=(80 8761 8081 8082 8083 8084 8085 8086)
+  local i=0 # Index for lists
 
   # Find needed port.
-  local i=0
   for s in ${services[*]}; do
     if [ $s == $service ]; then
       break
@@ -38,19 +40,13 @@ check_service() {
 }
 
 restart_service() {
-  # Check zookeeper.
-  if [ $(sudo netstat -ntulp | grep -c -w "2181") -ne 1 ]; then
-    docker-compose up --no-deps -d zookeeper
-  fi
 
-  # Check kafka.
-  if [ $(sudo netstat -ntulp | grep -c -w "9092") -ne 1 ]; then
-    docker-compose up --no-deps -d kafka
-  fi
-
-  # Check cadvisor.
-  if [ $(sudo netstat -ntulp | grep -c -w "9200") -ne 1 ]; then
-    docker-compose up --no-deps -d cadvisor
+  # Create the necessary dependencies if the network doesn't exist
+  if [ $(sudo docker network ls | grep -c -w "kickscooter_default") -eq 0 ]; then
+    dependencies_list=(zookeeper kafka cadvisor)
+    for container in ${dependencies_list[*]}; do
+	  docker-compose up --no-deps -d $container
+    done
   fi
 
   docker-compose up --no-deps -d $service
