@@ -8,15 +8,7 @@
 #         deploy the application immediately.
 # -----------------------------------------------
 
-send_private_ip_to_the_tc() {
-  # Save private ip in file.
-  hostname -I | awk '{print $1}' > /opt/kickscooter/"$(hostname).txt"
-
-  # Set variables for connection via scp.
-  local USERNAME=$( cat /opt/kickscooter/init/.tc/username )
-  local IP=$( cat /opt/kickscooter/init/.tc/ip )
-
-  # Waiting for SSH server to start.
+wait_for_ssh_server_to_start() {
   local EXECUTE=true
   while $EXECUTE; do
     if [ $(service ssh status | grep -c -w "active (running)") -eq 1 ]; then
@@ -25,6 +17,15 @@ send_private_ip_to_the_tc() {
       sleep 10
     fi
   done
+}
+
+send_private_ip_to_the_tc() {
+  # Save private ip in file.
+  hostname -I | awk '{print $1}' > /opt/kickscooter/"$(hostname).txt"
+
+  # Set variables for connection via scp.
+  local USERNAME=$( cat /opt/kickscooter/init/.tc/username )
+  local IP=$( cat /opt/kickscooter/init/.tc/ip )
 
   # Send file.
   scp /opt/kickscooter/*.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
@@ -97,6 +98,7 @@ clean_up() {
 }
 
 main() {
+  wait_for_ssh_server_to_start
   send_private_ip_to_the_tc
   download_env_files_from_gcs
   update_env_files
