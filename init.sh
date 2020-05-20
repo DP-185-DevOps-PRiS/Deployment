@@ -77,7 +77,7 @@ deployment() {
   local USERNAME=$( cat /opt/kickscooter/init/.docker/username )
   local PASSWORD=$( cat /opt/kickscooter/init/.docker/password )
   docker login -u $USERNAME -p $PASSWORD $URI
-  docker-compose up -d
+  docker-compose -f /opt/kickscooter/docker-compose.yml up -d
 }
 
 clean_up() {
