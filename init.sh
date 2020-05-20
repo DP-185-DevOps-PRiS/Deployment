@@ -82,10 +82,8 @@ deployment() {
 
 clean_up() {
  rm /opt/kickscooter/*.txt
- rm -R /opt/kickscooter/init/env
- #rm -R init/.tc init/.gcp init/.az
- #rm -R init/.ssh init/.docker
- rm -R /root/.azure
+ rm -R /opt/kickscooter/init{env,.tc,.gcp,.az,.ssh,.docker}
+ rm -R /root/{.ssh,.azure}
 }
 
 main() {
