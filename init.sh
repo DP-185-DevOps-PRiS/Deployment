@@ -20,9 +20,10 @@ send_private_ip_to_the_tc() {
   execute=true
   while $execute; do
     if [ $(service ssh status | grep -c -w "active (running)") -eq 1 ]; then
-	   execute=false
-	else
-	  sleep 10
+      execute=false
+    else
+      sleep 10
+    fi
   done
 
   # Send file.
