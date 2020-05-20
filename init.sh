@@ -35,7 +35,7 @@ download_env_files_from_gcs() {
   # Set bucket name.
   local BUCKET_NAME=$( cat /opt/kickscooter/init/.gcp/bucket_name )
 
-  # Login to GCP.
+  # Log in to GCP.
   gcloud auth activate-service-account \
     --quiet \
     --key-file /opt/kickscooter/init/.gcp/key.json
@@ -61,6 +61,35 @@ update_env_files() {
   for service in ${service_list[*]}; do
     sed "s|eureka|$EUREKA_IP|" /opt/kickscooter/init/env/${service}.env > /opt/kickscooter/env/${service}.env
   done
+}
+
+install_node_exporter() {
+  apt install wget -y
+  useradd --no-create-home --shell /bin/false nodeusr
+  wget https://github.com/prometheus/node_exporter/releases/download/v1.0.0-rc.1/node_exporter-1.0.0-rc.1.linux-amd64.tar.gz -P /tmp/
+  tar xvfz /tmp/node_exporter-1.0.0-rc.1.linux-amd64.tar.gz -C /opt/
+  cp -a /opt/node_exporter-1.0.0-rc.1.linux-amd64/node_exporter /usr/local/bin/
+  chown -R nodeusr:nodeusr /usr/local/bin/node_exporter
+  touch /etc/systemd/system/node_exporter.service
+cat << EOF > /etc/systemd/system/node_exporter.service
+[Unit]
+Description=Node Exporter Service
+After=network.target
+[Service]
+User=nodeusr
+Group=nodeusr
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl daemon-reload
+  systemctl enable node_exporter
+  systemctl start node_exporter
+  rm /tmp/node_exporter-1.0.0-rc.1.linux-amd64.tar.gz
 }
 
 check_acr_for_images() {
@@ -92,9 +121,9 @@ deployment() {
 }
 
 clean_up() {
- rm /opt/kickscooter/*.txt
- rm -R /opt/kickscooter/init/{env,.tc,.gcp,.az,.ssh,.docker}
- rm -R /root/{.ssh,.azure}
+  rm /opt/kickscooter/*.txt
+  rm -R /opt/kickscooter/init/{env,.tc,.gcp,.az,.ssh,.docker}
+  rm -R /root/{.ssh,.azure}
 }
 
 main() {
@@ -102,6 +131,7 @@ main() {
   send_private_ip_to_the_tc
   download_env_files_from_gcs
   update_env_files
+  install_node_exporter
   check_acr_for_images || deployment
   clean_up
 }
