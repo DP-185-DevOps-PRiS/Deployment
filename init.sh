@@ -14,10 +14,10 @@ send_private_ip_to_the_tc() {
 
   # Set variables for connection via scp.
   local USERNAME=$( cat /opt/kickscooter/init/.tc/username )
-  local IP=$( cat init/.tc/ip )
+  local IP=$( cat /opt/kickscooter/init/.tc/ip )
 
   # Send file.
-  scp -i init/.ssh/id_rsa /opt/kickscooter/*.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
+  scp -i /opt/kickscooter/init/.ssh/id_rsa /opt/kickscooter/*.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
 }
 
 download_env_files_from_gcs() {
