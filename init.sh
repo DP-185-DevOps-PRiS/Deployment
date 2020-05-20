@@ -17,10 +17,10 @@ send_private_ip_to_the_tc() {
   local IP=$( cat /opt/kickscooter/init/.tc/ip )
 
   # Waiting for SSH server to start.
-  execute=true
-  while $execute; do
+  local EXECUTE=true
+  while $EXECUTE; do
     if [ $(service ssh status | grep -c -w "active (running)") -eq 1 ]; then
-      execute=false
+      EXECUTE=false
     else
       sleep 10
     fi
