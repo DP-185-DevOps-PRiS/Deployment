@@ -17,7 +17,7 @@ send_private_ip_to_the_tc() {
   local IP=$( cat init/.tc/ip )
 
   # Send file.
-  scp *.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
+  scp -i init/.ssh/id_rsa *.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
 }
 
 download_env_files_from_gcs() {
@@ -89,7 +89,6 @@ clean_up() {
 }
 
 main() {
-  sleep 30
   send_private_ip_to_the_tc
   download_env_files_from_gcs
   update_env_files
