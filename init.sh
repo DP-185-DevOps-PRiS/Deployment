@@ -89,6 +89,7 @@ clean_up() {
 }
 
 main() {
+  sleep 30
   send_private_ip_to_the_tc
   download_env_files_from_gcs
   update_env_files
