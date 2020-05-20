@@ -13,16 +13,16 @@ send_private_ip_to_the_tc() {
   hostname -I | awk '{print $1}' > "$(hostname).txt"
 
   # Set variables for connection via scp.
-  local USERNAME=$( cat /opt/kickscooter/init/.tc/username )
-  local IP=$( cat /opt/kickscooter/init/.tc/ip )
+  local USERNAME=$( cat init/.tc/username )
+  local IP=$( cat init/.tc/ip )
 
   # Send file.
-  scp -o LogLevel=ERROR /opt/kickscooter/*.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
+  scp *.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
 }
 
 download_env_files_from_gcs() {
   # Set bucket name.
-  local BUCKET_NAME=$( cat /opt/kickscooter/init/.gcp/bucket_name )
+  local BUCKET_NAME=$( cat init/.gcp/bucket_name )
 
   # Login to GCP.
   gcloud auth activate-service-account \
@@ -35,28 +35,28 @@ download_env_files_from_gcs() {
 
 update_env_files() {
   # Set EUREKA_IP value.
-  local EUREKA_IP=$( cat /opt/kickscooter/*.txt )
+  local EUREKA_IP=$( cat *.txt )
 
   # Create env folder for final values.
-  mkdir /opt/kickscooter/env && chmod 700 /opt/kickscooter/env
+  mkdir env
 
   # Copy the current file for kafka.
-  cp /opt/kickscooter/env/kafka.env /opt/kickscooter/env
+  cp init/env/kafka.env env
 
   # Set services names.
   local service_list=(gateway identity messaging payment simulator trip vehicle)
 
   # Update EUREKA_SERVER value in all env-files.
   for service in ${service_list[*]}; do
-    sed "s|eureka|$EUREKA_IP|" /opt/kickscooter/init/env/${service}.env > /opt/kickscooter/env/${service}.env
+    sed "s|eureka|$EUREKA_IP|" init/env/${service}.env > env/${service}.env
   done
 }
 
 check_acr_for_images() {
   # Set variables to log in to Azure.
-  local CLIENT_ID=$( cat /opt/kickscooter/init/.az/client_id )
-  local CLIENT_SECRET=$( cat /opt/kickscooter/init/.az/client_secret )
-  local TENANT_ID=$( cat /opt/kickscooter/init/.az/tenant_id )
+  local CLIENT_ID=$( cat init/.az/client_id )
+  local CLIENT_SECRET=$( cat init/.az/client_secret )
+  local TENANT_ID=$( cat init/.az/tenant_id )
 
   # Log in to Azure.
   az login --output none --service-principal \
@@ -73,24 +73,19 @@ check_acr_for_images() {
 }
 
 deployment() {
-  local URI=$( cat /opt/kickscooter/init/.docker/uri )
-  local USERNAME=$( cat /opt/kickscooter/init/.docker/username )
-  local PASSWORD=$( cat /opt/kickscooter/init/.docker/password )
+  local URI=$( cat init/.docker/uri )
+  local USERNAME=$( cat init/.docker/username )
+  local PASSWORD=$( cat init/.docker/password )
   docker login -u $USERNAME -p $PASSWORD $URI
-  docker-compose -f /opt/kickscooter/docker-compose.yml up -d
+  docker-compose up -d
 }
 
 clean_up() {
- rm /opt/kickscooter/*.txt
- rm -R /opt/kickscooter/env
-
- rm -R /opt/kickscooter/init/.tc \
-       /opt/kickscooter/init/.gcp \
-	   /opt/kickscooter/init/.az \
-	   /opt/kickscooter/init/.ssh \
-	   /opt/kickscooter/init/.docker
-
- rm -R /root/.ssh /root/.azure
+ rm *.txt
+ rm -R init/env
+ #rm -R init/.tc init/.gcp init/.az
+ #rm -R init/.ssh init/.docker
+ rm -R /root/.azure
 }
 
 main() {
