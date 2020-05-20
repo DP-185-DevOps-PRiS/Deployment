@@ -13,8 +13,8 @@ send_private_ip_to_the_tc() {
   hostname -I | awk '{print $1}' > "$(hostname).txt"
 
   # Set variables for connection via scp.
-  local USERNAME=$( cat .tc/username )
-  local IP=$( cat .tc/ip )
+  local USERNAME=$( cat init/.tc/username )
+  local IP=$( cat init/.tc/ip )
 
   # Send file.
   scp -o LogLevel=ERROR *.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
@@ -22,12 +22,12 @@ send_private_ip_to_the_tc() {
 
 download_env_files_from_gcs() {
   # Set bucket name.
-  local BUCKET_NAME=$( cat .gcp/bucket_name )
+  local BUCKET_NAME=$( cat init/.gcp/bucket_name )
 
   # Login to GCP.
   gcloud auth activate-service-account \
     --quiet \
-    --key-file .gcp/key.json
+    --key-file init/.gcp/key.json
 
   # Download env-files.
   gsutil -q cp -r gs://$BUCKET_NAME/env .
@@ -35,7 +35,7 @@ download_env_files_from_gcs() {
 
 update_env_files() {
   # Set EUREKA_IP value.
-  local EUREKA_IP=$( cat *.txt )
+  local EUREKA_IP=$( cat init/*.txt )
 
   # Create env folder for final values.
   mkdir $PATH_TO_APP/env && chmod 700 $PATH_TO_APP/env
@@ -54,9 +54,9 @@ update_env_files() {
 
 check_acr_for_images() {
   # Set variables to log in to Azure.
-  local CLIENT_ID=$( cat .az/client_id )
-  local CLIENT_SECRET=$( cat .az/client_secret )
-  local TENANT_ID=$( cat .az/tenant_id )
+  local CLIENT_ID=$( cat init/.az/client_id )
+  local CLIENT_SECRET=$( cat init/.az/client_secret )
+  local TENANT_ID=$( cat init/.az/tenant_id )
 
   # Log in to Azure.
   az login --output none --service-principal \
@@ -73,14 +73,15 @@ check_acr_for_images() {
 }
 
 deployment() {
-  local URI=$( cat .docker/uri )
-  local USERNAME=$( cat .docker/username )
-  local PASSWORD=$( cat .docker/password )
+  local URI=$( cat init/.docker/uri )
+  local USERNAME=$( cat init/.docker/username )
+  local PASSWORD=$( cat init/.docker/password )
   docker login -u $USERNAME -p $PASSWORD $URI
   docker-compose -f $PATH_TO_APP/docker-compose.yml up -d
 }
 
 clean_up() {
+ cd $PATH_TO_APP/init
  rm *.txt
  rm -R env
  rm -R .tc .gcp .az .ssh .docker
