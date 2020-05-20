@@ -16,6 +16,15 @@ send_private_ip_to_the_tc() {
   local USERNAME=$( cat /opt/kickscooter/init/.tc/username )
   local IP=$( cat /opt/kickscooter/init/.tc/ip )
 
+  # Waiting for SSH server to start.
+  execute=true
+  while $execute; do
+    if [ $(service ssh status | grep -c -w "active (running)") -eq 1 ]; then
+	   execute=false
+	else
+	  sleep 10
+  done
+
   # Send file.
   scp /opt/kickscooter/*.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
 }
