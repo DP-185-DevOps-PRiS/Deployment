@@ -1,35 +1,28 @@
 #!/bin/bash
 
-# Define needed variables.
-init_vars() {
-  service=$1
-  image_name=kickscooter.azurecr.io/$service
-  container_name=kickscooter_${service}_1
-}
-
 # Check if the service is active.
 check_service() {
-  local services=(gateway discovery messaging identity payment trip vehicle simulator)
-  local ports=(80 8761 8081 8082 8083 8084 8085 8086)
+  local SERVICE_LIST=(gateway discovery messaging identity payment trip vehicle simulator)
+  local PORTS=(80 8761 8081 8082 8083 8084 8085 8086)
   local i=0 # Index for lists
 
   # Find needed port.
-  for s in ${services[*]}; do
-    if [ $s == $service ]; then
+  for s in ${SERVICE_LIST[*]}; do
+    if [ $s == $SERVICE ]; then
       break
     fi
     (( i++))
   done
 
   # Check if the service is active now.
-  if [ $(sudo netstat -ntulp | grep -c -w "${ports[$i]}") -eq 1 ]; then
+  if [ $(sudo netstat -ntulp | grep -c -w "${PORTS[$i]}") -eq 1 ]; then
     echo "Service is active!"
     echo "Stopping the container ..."
-    docker stop $container_name
+    docker stop $CONTAINER_NAME
     echo "Removing a container from the list of the containers ..."
-    docker rm $container_name
+    docker rm $CONTAINER_NAME
     echo "Removing the old image ..."
-    docker rmi $image_name
+    docker rmi $IMAGE_NAME
   else
     echo "Service is not active!"
   fi
@@ -46,11 +39,16 @@ restart_service() {
     done
   fi
 
-  docker-compose up --no-deps -d $service
+  docker-compose up --no-deps -d $SERVICE
 }
 
 main() {
-  init_vars $1
+  # Define needed variables.
+  SERVICE=$1
+  IMAGE_NAME=kickscooter.azurecr.io/$SERVICE
+  CONTAINER_NAME=kickscooter_${SERVICE}_1
+  
+  # Check if the service is active now.
   check_service
 }
 
