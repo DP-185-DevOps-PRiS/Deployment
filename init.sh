@@ -17,7 +17,7 @@ send_private_ip_to_the_tc() {
   local IP=$( cat init/.tc/ip )
 
   # Send file.
-  scp -o LogLevel=ERROR *.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
+  scp -o LogLevel=ERROR -i /root/.ssh/id_rsa *.txt $USERNAME@$IP:/root/IPs/AzureScaleSet
 }
 
 download_env_files_from_gcs() {
@@ -35,7 +35,7 @@ download_env_files_from_gcs() {
 
 update_env_files() {
   # Set EUREKA_IP value.
-  local EUREKA_IP=$( cat init/*.txt )
+  local EUREKA_IP=$( cat *.txt )
 
   # Create env folder for final values.
   mkdir $PATH_TO_APP/env && chmod 700 $PATH_TO_APP/env
@@ -82,7 +82,7 @@ deployment() {
 
 clean_up() {
  cd $PATH_TO_APP/init
- rm *.txt
+ rm $PATH_TO_APP/*.txt
  rm -R env
  rm -R .tc .gcp .az .ssh .docker
  rm -R /root/.ssh /root/.azure
