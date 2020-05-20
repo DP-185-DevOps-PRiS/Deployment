@@ -73,13 +73,17 @@ check_acr_for_images() {
 }
 
 deployment() {
+  local URI=$( cat .docker/uri )
+  local USERNAME=$( cat .docker/username )
+  local PASSWORD=$( cat .docker/password )
+  docker login -u $USERNAME -p $PASSWORD $URI
   docker-compose -f $PATH_TO_APP/docker-compose.yml up -d
 }
 
 clean_up() {
  rm *.txt
  rm -R env
- rm -R .tc .gcp .az .ssh
+ rm -R .tc .gcp .az .ssh .docker
  rm -R /root/.ssh /root/.azure
 }
 
