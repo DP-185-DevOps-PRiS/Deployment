@@ -32,6 +32,9 @@ send_private_ip_to_the_tc() {
 }
 
 download_env_files_from_gcs() {
+  # Waiting for the completion of the script on TeamCity.
+  sleep 90
+  
   # Set bucket name.
   local BUCKET_NAME=$( cat /opt/kickscooter/init/.gcp/bucket_name )
 
@@ -129,9 +132,9 @@ clean_up() {
 main() {
   wait_for_ssh_server_to_start
   send_private_ip_to_the_tc
+  install_node_exporter
   download_env_files_from_gcs
   update_env_files
-  install_node_exporter
   check_acr_for_images || deployment
   clean_up
 }
